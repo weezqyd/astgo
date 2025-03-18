@@ -3,13 +3,12 @@ package ami
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"net"
 	"regexp"
-	"sync/atomic"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/nrednav/cuid2"
 	"github.com/pkg/errors"
 	"github.com/wenerme/astgo/ami/amimodels"
 	"go.uber.org/zap"
@@ -77,7 +76,6 @@ func Connect(addr string, opts ...ConnectOption) (conn *Conn, err error) {
 		}
 	}
 
-	var id uint64
 	conn = &Conn{
 		ctx:     opt.Context,
 		conf:    opt,
@@ -85,7 +83,7 @@ func Connect(addr string, opts ...ConnectOption) (conn *Conn, err error) {
 		recv:    make(chan *Message, 4096),
 		pending: make(chan *asyncMsg, 100),
 		nextID: func() string {
-			return fmt.Sprint(atomic.AddUint64(&id, 1))
+			return cuid2.Generate()
 		},
 	}
 	for _, sub := range opt.subscribers {
